@@ -18,6 +18,9 @@ void ASDashProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
+	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedDetonate);
+	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedTeleport);
+
 	GetWorldTimerManager().SetTimer(TimerHandle_DelayedDetonate, this, &ASDashProjectile::Explode, DetonateDelay);
 }
 
@@ -26,14 +29,16 @@ void ASDashProjectile::Explode_Implementation()
 	//clear timer if the Explode was already called through another source like OnActorHit
 	GetWorldTimerManager().ClearTimer(TimerHandle_DelayedDetonate);
 
-	UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
-
+	if (ImpactVFX)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+	}
+	
 	EffectComp->DeactivateSystem();
-
 	MoveComp->StopMovementImmediately();
 	SetActorEnableCollision(false);
 
-	FTimerHandle TimerHandle_DelayedTeleport;
+
 	GetWorldTimerManager().SetTimer(TimerHandle_DelayedTeleport, this, &ASDashProjectile::TeleportInstigator, TeleportDelay);
 
 	//Skip base implementation as it will destroy actor (we need to stay alive a bit longer to finish the 2nd timer)
@@ -42,10 +47,14 @@ void ASDashProjectile::Explode_Implementation()
 
 void ASDashProjectile::TeleportInstigator()
 {
-	AActor* ActorToTeleport = GetInstigator();
-	if (ensure(ActorToTeleport)) 
-	{
-		//keep instigator rotation or it may end up jarring
-		ActorToTeleport->TeleportTo(GetActorLocation(), ActorToTeleport->GetActorRotation(), false, false);
-	}
+	APawn* ActorToTeleport = GetInstigator();
+	// todo: We should check if instigator is still valid/alive once we implement Death
+	check(ActorToTeleport);
+
+	// Handles de-penetration on nearby collision geometry
+	ActorToTeleport->TeleportTo(GetActorLocation(), ActorToTeleport->GetActorRotation());
+	// note: the teleport call might fail if it cannot find any valid location
+
+	// Clear projectile from world, can't do this any sooner as that would prevent the timers from running on a valid Actor
+	Destroy();
 }

@@ -13,7 +13,7 @@ UCLASS()
 class ACTIONROGUELIKE_API ASDashProjectile : public ASProjectileBase
 {
 	GENERATED_BODY()
-	
+
 public:
 	ASDashProjectile();
 
@@ -27,12 +27,12 @@ protected:
 	//Handle to cancel timer if we already hit something
 	FTimerHandle TimerHandle_DelayedDetonate;
 
+	FTimerHandle TimerHandle_DelayedTeleport;
+
 	//Base class using BlueprintNativeEvent, we must override the _Implementation not the Explode()
 	virtual void Explode_Implementation() override;
 
 	void TeleportInstigator();
 
 	virtual void BeginPlay() override;
-	
-
 };
