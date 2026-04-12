@@ -9,6 +9,7 @@
 class USphereComponent;
 class UProjectileMovementComponent;
 class UPArticleSystemComponent;
+class UAudioComponent;
 
 UCLASS(ABSTRACT) //'ABSTRACT' marks this class as incomplete, keeping this out of certain dropdowns windows like SpawnActor int Unreal Editor
 class ACTIONROGUELIKE_API ASProjectileBase : public AActor
@@ -20,6 +21,9 @@ public:
 	ASProjectileBase();
 
 protected:
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	float DamageAmount;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Effects")
 	UParticleSystem* ImpactVFX;
 
@@ -31,6 +35,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	UParticleSystemComponent* EffectComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	UAudioComponent* AudioComp;
 	
 	// 'virtual' so we can override this in child-classes
 	UFUNCTION()
