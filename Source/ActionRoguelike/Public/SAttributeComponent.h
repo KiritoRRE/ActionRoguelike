@@ -37,5 +37,5 @@ public:
 	FOnHealthChanged OnHealthChanged;
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
-	bool ApplyHealthChange(float Delta);	
+	bool ApplyHealthChange(class AActor* InstigatorActor, float Delta);	
 };
