@@ -33,7 +33,16 @@ ASProjectileBase::ASProjectileBase()
 
 void ASProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	Explode();
+	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherActor != GetInstigator()))
+	{
+		// 忽略与其他子弹的碰撞
+		if (OtherActor->IsA(ASProjectileBase::StaticClass()))
+		{
+			return;
+		}
+
+		Explode();
+	}
 }
 
 //_Implementation from it being marked as BlueprintNativeEvent
@@ -41,9 +50,12 @@ void ASProjectileBase::Explode_Implementation()
 {
 	//check to make sure we aren't already being 'destroyed'
 	//Adding ensure to see if we encounter this situation at all
-	if (IsValid(this))
+	if (ensure(IsValid(this)))
 	{
-		UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+		if (ensure(ImpactVFX))
+		{
+			UGameplayStatics::SpawnEmitterAtLocation(this, ImpactVFX, GetActorLocation(), GetActorRotation());
+		}
 
 		Destroy();
 	}

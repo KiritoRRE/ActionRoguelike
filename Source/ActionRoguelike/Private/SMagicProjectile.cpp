@@ -21,12 +21,17 @@ ASMagicProjectile::ASMagicProjectile()
 void ASMagicProjectile::OnActorOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor && OtherActor != GetInstigator()) {
+		// 忽略与其他子弹的重叠
+		if (OtherActor->IsA(ASProjectileBase::StaticClass())) {
+			return;
+		}
+
 		USAttributeComponent* AttributeComp = Cast<USAttributeComponent>(OtherActor->GetComponentByClass(USAttributeComponent::StaticClass()));
 		if (AttributeComp) {
 			AttributeComp->ApplyHealthChange(GetInstigator(), -DamageAmount);
-
-			Explode();
 		}
+		
+		Explode();
 	}
 }
 
