@@ -26,16 +26,25 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category ="Attributes")
 	float Health;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attributes")
 	float HealthMax = 100.0f;
 
 	//Stamina, Strength
 
 public:	
 	UFUNCTION(BlueprintCallable)
+	bool kill(AActor* InstigatorActor);
+
+	UFUNCTION(BlueprintCallable)
 	bool IsAlive() const;
-
+	
+	UFUNCTION(BlueprintCallable)
 	bool IsFullHealth() const;
+	
+	UFUNCTION(BlueprintCallable)
+	float GetHealth() const;
 
+	UFUNCTION(BlueprintCallable)
 	float GetHealthMax() const;
 	
 	UPROPERTY(BlueprintAssignable)

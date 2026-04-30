@@ -5,6 +5,8 @@
 #include "SGamePlayInterface.h"
 #include "DrawDebugHelpers.h"
 
+static TAutoConsoleVariable<bool> CVarDebugDrawInteraction(TEXT("su.InteractionDebugDraw"), false, TEXT("Enale Debug Lines for Interact Component."), ECVF_Cheat);
+
 // Sets default values for this component's properties
 USInteractionComponent::USInteractionComponent()
 {
@@ -36,6 +38,8 @@ void USInteractionComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 
 void USInteractionComponent::PrimaryInteract()
 {
+	bool bDebugDraw = CVarDebugDrawInteraction.GetValueOnGameThread();
+
 	FCollisionObjectQueryParams ObjectQueryParams;
 	ObjectQueryParams.AddObjectTypesToQuery(ECC_WorldDynamic);
 	
@@ -61,17 +65,24 @@ void USInteractionComponent::PrimaryInteract()
 
 	FColor LineColor = bHit ? FColor::Green : FColor::Red;
 
-	for (FHitResult Hit : Hits) {
+	for (FHitResult Hit : Hits) 
+	{
+		if (bDebugDraw)
+		{
+			DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32, LineColor, false, 2.0f);
+		}
+
 		AActor* HitActor = Hit.GetActor();
-		if (HitActor) {
-			if (HitActor->Implements<USGamePlayInterface>()) {
+		if (HitActor) 
+		{
+			if (HitActor->Implements<USGamePlayInterface>()) 
+			{
 				APawn* MyPawn = Cast<APawn>(MyOwner);
 
 				ISGamePlayInterface::Execute_Interact(HitActor, MyPawn);
 				break;
 			}
 		}
-		DrawDebugSphere(GetWorld(), Hit.ImpactPoint, Radius, 32,LineColor, false, 2.0f);
 	} 
 
 	/*for (const FHitResult& HitResult : Hit) {
@@ -85,6 +96,8 @@ void USInteractionComponent::PrimaryInteract()
 		}
 	}
 	*/
-	
-	DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	if (bDebugDraw)
+	{
+		DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	}
 }

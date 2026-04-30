@@ -10,7 +10,9 @@
 #include "EngineUtils.h"
 #include "Curves/CurveFloat.h"
 #include "DrawDebugHelpers.h"
+#include "SCharacter.h"
 
+static TAutoConsoleVariable<bool> CVarSpawnBots(TEXT("su.SpawnBots"), true, TEXT("Enable spawning of bots via timer."), ECVF_Cheat);
 
 ASGameModeBase::ASGameModeBase()
 {
@@ -26,8 +28,16 @@ void ASGameModeBase::StartPlay()
 	GetWorldTimerManager().SetTimer(TimerHandle_SpawnBots, this, &ASGameModeBase::SpawnBotTimerElapsed, SpawnTimerInterval, true);
 }
 
+
+
 void ASGameModeBase::SpawnBotTimerElapsed()
 {
+	if (!CVarSpawnBots.GetValueOnGameThread())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bot Spawning disabled via cvar 'CVarSpawnBots'."));
+		return;
+	}
+
 	int32 NrOfAliveBots = 0;
 	for (ASAICharacter* Bot : TActorRange<ASAICharacter>(GetWorld()))
 	{
@@ -94,4 +104,41 @@ void ASGameModeBase::OnQueryCompleted(UEnvQueryInstanceBlueprintWrapper* QueryIn
 			UE_LOG(LogTemp, Warning, TEXT("MinionClass is nullptr. Please assign it in the GameMode Blueprint."));
 		}
 	}
+}
+
+void ASGameModeBase::killAllBots()
+{
+	for (ASAICharacter* Bot : TActorRange<ASAICharacter>(GetWorld()))
+	{
+		USAttributeComponent* AttributeComp = USAttributeComponent::GetAttributes(Bot);
+		if (ensure(AttributeComp) && AttributeComp->IsAlive())
+		{
+			AttributeComp->kill(this); // @fixme: pass in player for kill credit
+		}
+	}
+}
+
+void ASGameModeBase::RespawnPlayerElapsed(AController* controller)
+{
+	if (ensure(controller))
+	{
+		controller->UnPossess();
+
+		RestartPlayer(controller);
+	}
+}
+void ASGameModeBase::OnActorKilled(AActor* VictimActor, AActor* killer)
+{
+	ASCharacter* Player = Cast<ASCharacter>(VictimActor);
+	if (Player)
+	{
+		FTimerHandle TimerHandle_RespawnDelay;
+
+		FTimerDelegate Delegate;
+		Delegate.BindUFunction(this, "RespawnPlayerElapsed", Player->GetController());
+
+		float RespawnDelay = 2.0f;
+		GetWorldTimerManager().SetTimer(TimerHandle_RespawnDelay, Delegate, RespawnDelay, false);
+	}
+	UE_LOG(LogTemp, Log, TEXT("OnActorKilled: Vicitim: %s, Killer: %s"), *GetNameSafe(VictimActor), *GetNameSafe(killer));
 }

@@ -13,6 +13,7 @@ class UAnimMontage;
 class USAttributeComponent;
 class UParticleSystem;
 class UCameraShakeBase;
+class USActionComponent;
 
 UCLASS()
 class ACTIONROGUELIKE_API ASCharacter : public ACharacter
@@ -59,12 +60,19 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	USAttributeComponent* AttributeComp;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	USActionComponent* ActionComp;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	void MoveForward(float Value);
 
 	void MoveRight(float Value);
+
+	void SprintStart();
+
+	void SprintStop();
 
 	void PrimaryAttack();
 
@@ -89,10 +97,15 @@ protected:
 
 	virtual void PostInitializeComponents() override;
 
+	virtual FVector GetPawnViewLocation() const override;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+	UFUNCTION(Exec)
+	void HealSelf(float Amount = 100);
 };
