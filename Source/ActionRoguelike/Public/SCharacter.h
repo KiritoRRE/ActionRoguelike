@@ -21,33 +21,6 @@ class ACTIONROGUELIKE_API ASCharacter : public ACharacter
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> ProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> BlackholeProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	TSubclassOf<AActor> DashProjectileClass;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	UAnimMontage* AttackAnim;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	UParticleSystem* CastingEffect;
-
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float AttackAnimDelay = 0.2f;
-
-	FTimerHandle TimerHandle_PrimaryAttack;
-	FTimerHandle TimerHandle_BlackholeAttack;
-	FTimerHandle TimerHandle_Dash;
-
-public:
-	// Sets default values for this character's properties
-	ASCharacter();
-
-protected:
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 	
@@ -76,21 +49,11 @@ protected:
 
 	void PrimaryAttack();
 
-	void PrimaryAttack_TimeElapsed();
-
 	void PrimaryInteract();
 
 	void BlackHoleAttack();
 
-	void BlackholeAttack_TimeElapsed();
-
 	void Dash();
-	
-	void Dash_TimeElapsed();
-
-	void StartAttackEffects();
-
-	void SpawnProjectile(TSubclassOf<AActor> ClassToSpawn);
 
 	UFUNCTION()
 	void OnHealthChanged(AActor* InstigatorActor, USAttributeComponent* OwningComp, float NewHealth, float Delta);
@@ -100,6 +63,9 @@ protected:
 	virtual FVector GetPawnViewLocation() const override;
 
 public:	
+	// Sets default values for this character's properties
+	ASCharacter();
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
